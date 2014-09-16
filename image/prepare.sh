@@ -13,11 +13,6 @@ export INITRD=no
 mkdir -p /etc/container_environment
 echo -n no > /etc/container_environment/INITRD
 
-## Enable Ubuntu Universe and Multiverse.
-sed -i 's/^#\s*\(deb.*universe\)$/\1/g' /etc/apt/sources.list
-sed -i 's/^#\s*\(deb.*multiverse\)$/\1/g' /etc/apt/sources.list
-apt-get update
-
 ## Fix some issues with APT packages.
 ## See https://github.com/dotcloud/docker/issues/1024
 dpkg-divert --local --rename --add /sbin/initctl
@@ -36,6 +31,9 @@ mkdir -p /etc/workaround-docker-2267
 ln -s /etc/workaround-docker-2267 /cte
 cp /build/bin/workaround-docker-2267 /usr/bin/
 
+echo "deb ${DEBIAN_MIRROR} wheezy main" > /etc/apt/sources.list
+apt-get update
+
 ## Install HTTPS support for APT.
 $minimal_apt_get_install apt-transport-https ca-certificates
 
@@ -46,5 +44,5 @@ $minimal_apt_get_install software-properties-common
 apt-get dist-upgrade -y --no-install-recommends
 
 ## Fix locale.
-$minimal_apt_get_install language-pack-en
-locale-gen en_US
+$minimal_apt_get_install locales
+locale-gen en_US.UTF-8
